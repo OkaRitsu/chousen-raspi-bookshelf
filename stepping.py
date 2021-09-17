@@ -25,7 +25,7 @@ class Stepping:
         """
         self.mStep = 0
 
-        self.SetWaitTime(0.01)
+        self.set_wait_time(0.01)
 
         GPIO.setmode(GPIO.BCM)
 
@@ -37,7 +37,7 @@ class Stepping:
         GPIO.output(self.mPinA2, GPIO.HIGH)
         GPIO.output(self.mPinB2, GPIO.HIGH)
 
-    def SetWaitTime(self, wait):
+    def set_wait_time(self, wait):
         """ウエイト時間を設定する
         Args:
             wait: 設定する時間
@@ -51,7 +51,7 @@ class Stepping:
         logger.info({'action': 'SetWaitTime',
                      'wait_time': self.mStep_wait})
 
-    def Step_CW(self):
+    def step_cw(self):
         """時計回りに1Step回転させる"""
         GPIO.output(self.mPinA1, GPIO.HIGH)
         sleep(self.mStep_wait)
@@ -62,7 +62,7 @@ class Stepping:
         GPIO.output(self.mPinB1, GPIO.LOW)
         sleep(self.mStep_wait)
 
-    def Step_CCW(self):
+    def step_ccw(self):
         """反時計回りに1Step回転させる"""
         GPIO.output(self.mPinB1, GPIO.HIGH)
         sleep(self.mStep_wait)
@@ -73,7 +73,7 @@ class Stepping:
         GPIO.output(self.mPinA1, GPIO.LOW)
         sleep(self.mStep_wait)
 
-    def SetPosition(self, step, duration):
+    def set_position(self, step, duration):
         """目標ポジションに移動する
         Args:
             step: 目標の位置
@@ -97,7 +97,7 @@ class Stepping:
         self.mStep = step
         return self.mStep
 
-    def Cleanup(self):
+    def cleanup(self):
         """終了処理"""
         GPIO.cleanup()
 
@@ -107,14 +107,14 @@ if __name__ == '__main__':
     StepMoter = Stepping(PinA1=18, PinA2=23, PinB1=24, PinB2=25)
     try:
         while True:
-            StepMoter.SetPosition(0, 2)
+            StepMoter.set_position(0, 2)
             sleep(1)
-            StepMoter.SetPosition(150, 2)
+            StepMoter.set_position(150, 2)
             sleep(1)
     except KeyboardInterrupt:
         print("\nCtl+C")
     except Exception as e:
         print(str(e))
     finally:
-        StepMoter.Cleanup()
+        StepMoter.cleanup()
         print("\nexit program")
