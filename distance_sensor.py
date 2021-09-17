@@ -23,12 +23,9 @@ class DistanceSensor:
         GPIO.setup(self.echo, GPIO.IN)
 
     def read_distance(self):
-        """
-        多分こんな感じのことをしてる
-        ・HighとLOWで超音波を出力する
-        ・跳ね返ってきた音波を読み取る（HIGHとLOWそれぞれ）
-        ・読み取れた時間を測って
-        ・読み取った時間から距離をcmで計算する
+        """距離を計測する
+        Returns:
+            self.distance_cm: 計測した距離（cm）
         """
         GPIO.output(self.trig, GPIO.HIGH)
         time.sleep(0.00001)
@@ -47,12 +44,7 @@ class DistanceSensor:
 
         return self.distance_cm
 
-    def finish(self):
-        GPIO.cleanup()
 
-
-# このスクリプトを実行したときだけ↓が呼ばれる
-# importしたときは，ここは呼ばれない
 if __name__ == '__main__':
     dis_sensor = DistanceSensor(27, 17)
     try:
@@ -60,8 +52,6 @@ if __name__ == '__main__':
             cm = dis_sensor.read_distance()
             time.sleep(1)
             print(cm)
-    # Ctrl+Cで中断したときに呼ばれる
-    # 後片付け
     except KeyboardInterrupt:
         dis_sensor.finish()
         sys.exit()

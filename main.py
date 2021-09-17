@@ -4,8 +4,8 @@ import RPi.GPIO as GPIO
 import time
 import sys
 
-from Servo import Servo
-from DistanceSensor import DistanceSensor
+from servo import Servo
+from distance_sensor import DistanceSensor
 from stepping import Stepping
 
 # 距離センサ―で測った距離[cm]を

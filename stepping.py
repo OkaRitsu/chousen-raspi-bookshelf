@@ -9,13 +9,21 @@ logger = logging.getLogger(__name__)
 
 
 class Stepping:
-    """コンストラクタ"""
     def __init__(self, PinA1, PinA2, PinB1, PinB2):
         self.mPinA1 = PinA1     # GPIO Number
         self.mPinA2 = PinA2     # GPIO Number
         self.mPinB1 = PinB1     # GPIO Number
         self.mPinB2 = PinB2     # GPIO Number
-        self.mStep = 0          # 本当は1step = 0.9degだけど、簡略化のため100step = 360degとする
+
+        # 本当は1step = 0.9degだけど、
+        # 簡略化のため100step = 360 degとする
+        """
+        !!!!! 1stepの長さの計算方法 !!!!!
+        1step = 2r * Pi * (0.9/360)
+        r: ギアの半径
+        Pi: 円周率
+        """
+        self.mStep = 0
 
         self.SetWaitTime(0.01)
 
@@ -29,19 +37,22 @@ class Stepping:
         GPIO.output(self.mPinA2, GPIO.HIGH)
         GPIO.output(self.mPinB2, GPIO.HIGH)
 
-    """ウエイト時間を設定する"""
     def SetWaitTime(self, wait):
+        """ウエイト時間を設定する
+        Args:
+            wait: 設定する時間
+        """
         if wait < 0.01:
             self.mStep_wait = 0.005
         elif wait > 0.5:
             self.mStep_wait = 0.1
         else:
             self.mStep_wait = wait
-        logger.info({'action': 'SetWaitTime', 
+        logger.info({'action': 'SetWaitTime',
                      'wait_time': self.mStep_wait})
 
-    """CWに1Step移動する"""
     def Step_CW(self):
+        """時計回りに1Step回転させる"""
         GPIO.output(self.mPinA1, GPIO.HIGH)
         sleep(self.mStep_wait)
         GPIO.output(self.mPinB1, GPIO.HIGH)
@@ -51,8 +62,8 @@ class Stepping:
         GPIO.output(self.mPinB1, GPIO.LOW)
         sleep(self.mStep_wait)
 
-    """CCWに1Step移動する"""
     def Step_CCW(self):
+        """反時計回りに1Step回転させる"""
         GPIO.output(self.mPinB1, GPIO.HIGH)
         sleep(self.mStep_wait)
         GPIO.output(self.mPinA1, GPIO.HIGH)
@@ -62,8 +73,14 @@ class Stepping:
         GPIO.output(self.mPinA1, GPIO.LOW)
         sleep(self.mStep_wait)
 
-    """目標ポジションに移動する"""
     def SetPosition(self, step, duration):
+        """目標ポジションに移動する
+        Args:
+            step: 目標の位置
+            duration: 移動する時間
+        Returns:
+            self.mStep: 移動後の位置
+        """
         diff_step = step - self.mStep
         if diff_step != 0:
             wait = abs(float(duration)/float(diff_step)/4)
@@ -80,22 +97,21 @@ class Stepping:
         self.mStep = step
         return self.mStep
 
-    """終了処理"""
     def Cleanup(self):
+        """終了処理"""
         GPIO.cleanup()
 
 
 """メイン関数"""
 if __name__ == '__main__':
     StepMoter = Stepping(PinA1=18, PinA2=23, PinB1=24, PinB2=25)
-    #Main loop
     try:
         while True:
             StepMoter.SetPosition(0, 2)
             sleep(1)
             StepMoter.SetPosition(150, 2)
             sleep(1)
-    except KeyboardInterrupt:         #Ctl+Cが押されたらループを終了
+    except KeyboardInterrupt:
         print("\nCtl+C")
     except Exception as e:
         print(str(e))
