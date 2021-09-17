@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
-import RPi.GPIO as GPIO
+
+import logging
 import time
 import sys
+
+import RPi.GPIO as GPIO
+
+logger = logging.getLogger(__name__)
+
 
 class DistanceSensor:
     def __init__(self, trig, echo):
@@ -10,7 +16,7 @@ class DistanceSensor:
 
         # GPIOのモードをBCMに
         GPIO.setmode(GPIO.BCM)
-        #GPIO.setmode(GPIO..BOAD)
+        # GPIO.setmode(GPIO.BOAD)
         # trigで指定したピン番号を出力モードに
         GPIO.setup(self.trig, GPIO.OUT)
         # echoで指定したピン番号を入力モードに
@@ -36,10 +42,14 @@ class DistanceSensor:
         self.duration = self.sig_on - self.sig_off
         self.distance_cm = self.duration * 34000 / 2
 
+        logging.info({'action': 'read_distance',
+                      'distance': self.distance_cm})
+
         return self.distance_cm
 
     def finish(self):
         GPIO.cleanup()
+
 
 # このスクリプトを実行したときだけ↓が呼ばれる
 # importしたときは，ここは呼ばれない

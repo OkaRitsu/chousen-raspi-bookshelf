@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import time
 import sys
 
 import RPi.GPIO as GPIO
+
+logger = logging.getLogger(__name__)
+
+
 class Servo:
     def __init__(self, pin):
         # サーボモータのピン番号
@@ -30,11 +35,13 @@ class Servo:
     def down(self):
         for theta in range(-90, 90, 1):
             self.servo_angle(theta)
+            logger.info({'action': 'down'})
             time.sleep(0.01)
 
     def up(self):
         for theta in range(90, -90, -1):
             self.servo_angle(theta)
+            logger.info({'action': 'up'})
             time.sleep(0.01)
 
     # 後始末
@@ -42,6 +49,7 @@ class Servo:
         self.down()
         time.sleep(3)
         self.servo.stop()
+
 
 # このスクリプトを実行したときだけ↓が呼ばれる
 # importしたときは，ここは呼ばれない
