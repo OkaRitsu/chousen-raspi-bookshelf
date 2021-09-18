@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
-from time import sleep
+import time
 
 import RPi.GPIO as GPIO
 
@@ -54,32 +54,30 @@ class Stepping:
     def step_cw(self):
         """時計回りに1Step回転させる"""
         GPIO.output(self.mPinA1, GPIO.HIGH)
-        sleep(self.mStep_wait)
+        time.sleep(self.mStep_wait)
         GPIO.output(self.mPinB1, GPIO.HIGH)
-        sleep(self.mStep_wait)
+        time.sleep(self.mStep_wait)
         GPIO.output(self.mPinA1, GPIO.LOW)
-        sleep(self.mStep_wait)
+        time.sleep(self.mStep_wait)
         GPIO.output(self.mPinB1, GPIO.LOW)
-        sleep(self.mStep_wait)
+        time.sleep(self.mStep_wait)
 
     def step_ccw(self):
         """反時計回りに1Step回転させる"""
         GPIO.output(self.mPinB1, GPIO.HIGH)
-        sleep(self.mStep_wait)
+        time.sleep(self.mStep_wait)
         GPIO.output(self.mPinA1, GPIO.HIGH)
-        sleep(self.mStep_wait)
+        time.sleep(self.mStep_wait)
         GPIO.output(self.mPinB1, GPIO.LOW)
-        sleep(self.mStep_wait)
+        time.sleep(self.mStep_wait)
         GPIO.output(self.mPinA1, GPIO.LOW)
-        sleep(self.mStep_wait)
+        time.sleep(self.mStep_wait)
 
     def set_position(self, step, duration):
         """目標ポジションに移動する
         Args:
             step: 目標の位置
             duration: 移動する時間
-        Returns:
-            self.mStep: 移動後の位置
         """
         diff_step = step - self.mStep
         if diff_step != 0:
@@ -89,32 +87,26 @@ class Stepping:
                          'duration': duration,
                          'diff_step': diff_step})
             self.SetWaitTime(wait)
-        for i in range(int(abs(diff_step))):
+        for _ in range(int(abs(diff_step))):
             if diff_step > 0:
                 self.Step_CW()
             if diff_step < 0:
                 self.Step_CCW()
         self.mStep = step
-        return self.mStep
-
-    def cleanup(self):
-        """終了処理"""
-        GPIO.cleanup()
 
 
-"""メイン関数"""
 if __name__ == '__main__':
-    StepMoter = Stepping(PinA1=18, PinA2=23, PinB1=24, PinB2=25)
+    stepping = Stepping(PinA1=18, PinA2=23, PinB1=24, PinB2=25)
     try:
         while True:
-            StepMoter.set_position(0, 2)
-            sleep(1)
-            StepMoter.set_position(150, 2)
-            sleep(1)
+            stepping.set_position(0, 2)
+            time.sleep(1)
+            stepping.set_position(150, 2)
+            time.sleep(1)
     except KeyboardInterrupt:
         print("\nCtl+C")
     except Exception as e:
         print(str(e))
     finally:
-        StepMoter.cleanup()
+        GPIO.cleanup()
         print("\nexit program")

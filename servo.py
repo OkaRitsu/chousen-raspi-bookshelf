@@ -37,16 +37,16 @@ class Servo:
 
     def up(self):
         """本を持ち上げる"""
+        logger.info({'action': 'up'})
         for theta in range(90, -90, -1):
             self.servo_angle(theta)
-            logger.info({'action': 'up'})
             time.sleep(0.01)
 
     def down(self):
         """本を持ち上げるために回転させたステッピングモータを元に戻す"""
+        logger.info({'action': 'down'})
         for theta in range(-90, 90, 1):
             self.servo_angle(theta)
-            logger.info({'action': 'down'})
             time.sleep(0.01)
 
     def stop(self):
@@ -60,12 +60,9 @@ if __name__ == '__main__':
     servo = Servo(12)
     try:
         while True:
-            print('up')
             servo.up()
             time.sleep(2)
-            print('down')
             servo.down()
-
     except KeyboardInterrupt:
         servo.stop()
         GPIO.cleanup()

@@ -28,8 +28,8 @@ GEAR_RADIUS = 3
 # ステッピングモータの速さ[cm/s]
 SPEED = 1
 # 本を取り終わるまで待つ時間[s]
-TIME_TO_WAIT_TAKE = 5
-# 装置の有効・無効を切り替えるために待つ時間
+TIME_TO_WAIT_TAKING = 5
+# 装置の有効・無効を切り替えるために待つ時間[s]
 TIME_TO_CHANGE_MODE = 2
 
 
@@ -75,9 +75,9 @@ class BookShelfManager:
         # 現在地から目的地までの距離
         difference = abs(current - destination)
         # 上で指定した速さ[cm/s]をstep/sに変換
-        step_per_sec = self.cm2step(SPEED)
+        step_speed = self.cm2step(SPEED)
         # 移動時間を求める
-        duration = difference / step_per_sec
+        duration = difference / step_speed
         return duration
 
     def move_and_lift_up(self, position):
@@ -93,12 +93,14 @@ class BookShelfManager:
                      'step': step,
                      'duration': duration})
         # ステッピングモータを移動させる
-        self.current_location = self.stepping.set_position(position, duration)
+        self.stepping.set_position(step, duration)
+        # 現在地を更新
+        self.current_location = step
         # 本を持ち上げる
         time.sleep(0.5)
         self.servo.up()
         # 本を取るまで待つ
-        time.sleep(TIME_TO_WAIT_TAKE)
+        time.sleep(TIME_TO_WAIT_TAKING)
         # サーボモータを元に戻す
         self.servo.down()
 
