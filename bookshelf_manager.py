@@ -45,7 +45,7 @@ class BookShelfManager:
         self.is_valid = True
 
         # 装置の有効・無効を変更するときに使う
-        self.retry = 0
+        self.timestamp = time.time()
 
     def __del__(self):
         self.servo.stop()
@@ -118,16 +118,22 @@ class BookShelfManager:
                 # 測定した位置まで移動し本を持ち上げる
                 self.move_and_lift_up(distance)
 
+            # 距離センサに手を近づけたら
             if distance < MIN_DISTANCE:
-                self.retry += 1
-                logger.warning({'retry': self.retry})
-                # retryが20回を超えたら
-                if self.retry > 20:
+                current_time = time.time()
+                diff_time = current_time - self.timestamp
+                logger.warning({'countdown': TIME_TO_CHANGE_MODE - diff_time})
+
+                # TIME_TO_CHANGE_MODE 秒以上距離センサに手を近づけたら
+                if diff_time > TIME_TO_CHANGE_MODE:
                     # 有効・無効を切り替える
                     self.is_valid = not self.is_valid
+                    logger.warning({
+                        'action': 'change mode',
+                        'is_valid': self.is_valid})
             else:
-                # リトライの回数をリセットする
-                self.retry = 0
+                # タイムスタンプをリセットする
+                self.timestamp = time.time()
 
 
 if __name__ == '__main__':
