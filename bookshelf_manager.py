@@ -49,6 +49,7 @@ class BookShelfManager:
 
     def __del__(self):
         self.servo.stop()
+        self.stepping.back_home()
         GPIO.cleanup()
         sys.exit()
 
@@ -134,6 +135,7 @@ class BookShelfManager:
             else:
                 # タイムスタンプをリセットする
                 self.timestamp = time.time()
+            time.sleep(MEASURE_CYCLE)
 
 
 if __name__ == '__main__':

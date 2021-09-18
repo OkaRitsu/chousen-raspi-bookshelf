@@ -94,6 +94,10 @@ class Stepping:
                 self.Step_CCW()
         self.mStep = step
 
+    def back_home(self):
+        """元の位置に戻る"""
+        self.set_position(0, 1)
+
 
 if __name__ == '__main__':
     stepping = Stepping(PinA1=18, PinA2=23, PinB1=24, PinB2=25)
@@ -108,5 +112,6 @@ if __name__ == '__main__':
     except Exception as e:
         print(str(e))
     finally:
+        stepping.back_home()
         GPIO.cleanup()
         print("\nexit program")
