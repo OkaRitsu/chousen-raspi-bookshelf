@@ -6,6 +6,7 @@ import sys
 
 import RPi.GPIO as GPIO
 
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
@@ -40,7 +41,7 @@ class DistanceSensor:
         distance_cm = duration * 34000 / 2
 
         logging.info({'action': 'read_distance',
-                      'distance': self.distance_cm})
+                      'distance': distance_cm})
 
         return distance_cm
 

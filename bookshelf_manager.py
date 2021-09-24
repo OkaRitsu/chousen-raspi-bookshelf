@@ -18,13 +18,13 @@ logger = logging.getLogger(__name__)
 # TODO: 以下のパラメータを調整
 
 # 距離センサ―が測る最小の距離[cm]
-MIN_DISTANCE = 5
+MIN_DISTANCE = 2
 # 距離センサーから測る最大の距離[cm]
-MAX_DISTANCE = 100
+MAX_DISTANCE = 10
 # 距離を測る周期[s]
 MEASURE_CYCLE = 0.1
 # ステッピングモータにつけられたギアの半径[cm]
-GEAR_RADIUS = 1
+GEAR_RADIUS = 2
 # ステッピングモータの速さ[cm/s]
 SPEED = 1
 # 本を取り終わるまで待つ時間[s]
@@ -62,7 +62,8 @@ class BookShelfManager:
             step: 変換後の値
         """
         # 1step = 2r * Pi * (0.9/360)
-        cm_per_step = 2 * GEAR_RADIUS * math.pi * (0.9 / 360)
+        # cm_per_step = 2 * GEAR_RADIUS * math.pi * (0.9 / 360)
+        cm_per_step = 0.055
         step = cm / cm_per_step
         return step
 
@@ -145,5 +146,7 @@ if __name__ == '__main__':
         manager.start()
     except KeyboardInterrupt:
         print('Ctrl-C')
+    except Exception as e:
+        print(e)
     finally:
         manager.stop()

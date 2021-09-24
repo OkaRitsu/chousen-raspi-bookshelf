@@ -106,8 +106,8 @@ if __name__ == '__main__':
         while True:
             stepping.set_position(0, 2)
             time.sleep(1)
-            stepping.set_position(150, 2)
-            time.sleep(1)
+            stepping.set_position(100, 2)
+            time.sleep(10)
     except KeyboardInterrupt:
         print("\nCtl+C")
     except Exception as e:
