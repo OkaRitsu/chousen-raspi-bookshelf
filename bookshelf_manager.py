@@ -24,7 +24,7 @@ MAX_DISTANCE = 100
 # 距離を測る周期[s]
 MEASURE_CYCLE = 0.1
 # ステッピングモータにつけられたギアの半径[cm]
-GEAR_RADIUS = 3
+GEAR_RADIUS = 1
 # ステッピングモータの速さ[cm/s]
 SPEED = 1
 # 本を取り終わるまで待つ時間[s]
@@ -47,7 +47,8 @@ class BookShelfManager:
         # 装置の有効・無効を変更するときに使う
         self.timestamp = time.time()
 
-    def __del__(self):
+   #  def __del__(self):
+    def stop(self):
         self.servo.stop()
         self.stepping.back_home()
         GPIO.cleanup()
@@ -140,4 +141,9 @@ class BookShelfManager:
 
 if __name__ == '__main__':
     manager = BookShelfManager()
-    manager.start()
+    try:
+        manager.start()
+    except KeyboardInterrupt:
+        print('Ctrl-C')
+    finally:
+        manager.stop()

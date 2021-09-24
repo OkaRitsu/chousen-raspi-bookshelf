@@ -86,12 +86,12 @@ class Stepping:
             logger.info({'action': 'SetPosition',
                          'duration': duration,
                          'diff_step': diff_step})
-            self.SetWaitTime(wait)
+            self.set_wait_time(wait)
         for _ in range(int(abs(diff_step))):
             if diff_step > 0:
-                self.Step_CW()
+                self.step_cw()
             if diff_step < 0:
-                self.Step_CCW()
+                self.step_ccw()
         self.mStep = step
 
     def back_home(self):
@@ -101,6 +101,7 @@ class Stepping:
 
 if __name__ == '__main__':
     stepping = Stepping(PinA1=18, PinA2=23, PinB1=24, PinB2=25)
+    print('インスタンスを作りました')
     try:
         while True:
             stepping.set_position(0, 2)
