@@ -83,14 +83,16 @@ if __name__ == '__main__':
     #Main loop
     try:
         while True:
-            StepMoter.SetPosition(0,2)
-            sleep(1)
-            StepMoter.SetPosition(150,2)
-            sleep(1)
+            # StepMoter.SetPosition(0,2)
+            # sleep(1)
+            # StepMoter.SetPosition(150,2)
+            #  sleep(1)
             # StepMoter.SetPosition(50,2)
             # sleep(1)
             # StepMoter.SetPosition(75,3)
             # sleep(1)
+            for i in range(10):
+                StepMoter.Step_CW()
     except KeyboardInterrupt  :         #Ctl+Cが押されたらループを終了
         print("\nCtl+C")
     except Exception as e:
