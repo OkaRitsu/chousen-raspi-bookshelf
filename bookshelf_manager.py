@@ -20,15 +20,13 @@ logger = logging.getLogger(__name__)
 # 距離センサ―が測る最小の距離[cm]
 MIN_DISTANCE = 2
 # 距離センサーから測る最大の距離[cm]
-MAX_DISTANCE = 10
+MAX_DISTANCE = 20
 # 距離を測る周期[s]
 MEASURE_CYCLE = 0.1
-# ステッピングモータにつけられたギアの半径[cm]
-GEAR_RADIUS = 2
 # ステッピングモータの速さ[cm/s]
-SPEED = 1
+SPEED = 3
 # 本を取り終わるまで待つ時間[s]
-TIME_TO_WAIT_TAKING = 5
+TIME_TO_WAIT_TAKING = 3
 # 装置の有効・無効を切り替えるために待つ時間[s]
 TIME_TO_CHANGE_MODE = 2
 
@@ -53,6 +51,11 @@ class BookShelfManager:
         self.stepping.back_home()
         GPIO.cleanup()
         sys.exit()
+
+    def calc_destination(self, distance):
+        destination = distance - 10
+        return destination
+
 
     def cm2step(self, cm):
         """cmをstepに変換する
@@ -112,14 +115,15 @@ class BookShelfManager:
         while True:
             # 距離を測る
             distance = self.dis_sensor.read_distance()
+            move_to = self.calc_destination(distance)
 
             # 装置が有効で距離が範囲内の時
             if self.is_valid and \
                     distance > MIN_DISTANCE and distance < MAX_DISTANCE:
                 logger.info({'status': 'valid',
-                             'goto': distance})
+                             'goto': move_to})
                 # 測定した位置まで移動し本を持ち上げる
-                self.move_and_lift_up(distance)
+                self.move_and_lift_up(move_to)
 
             # 距離センサに手を近づけたら
             if distance < MIN_DISTANCE:

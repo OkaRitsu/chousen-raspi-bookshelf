@@ -89,9 +89,9 @@ class Stepping:
             self.set_wait_time(wait)
         for _ in range(int(abs(diff_step))):
             if diff_step > 0:
-                self.step_cw()
-            if diff_step < 0:
                 self.step_ccw()
+            if diff_step < 0:
+                self.step_cw()
         self.mStep = step
 
     def back_home(self):
@@ -101,13 +101,12 @@ class Stepping:
 
 if __name__ == '__main__':
     stepping = Stepping(PinA1=18, PinA2=23, PinB1=24, PinB2=25)
-    print('インスタンスを作りました')
     try:
         while True:
-            stepping.set_position(0, 2)
+            #stepping.set_position(0, 2)
             time.sleep(1)
             stepping.set_position(100, 2)
-            time.sleep(10)
+            time.sleep(2)
     except KeyboardInterrupt:
         print("\nCtl+C")
     except Exception as e:

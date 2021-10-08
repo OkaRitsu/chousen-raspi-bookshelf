@@ -35,17 +35,19 @@ class Servo:
         # サーボモータを回転
         self.servo.ChangeDutyCycle(duty)
 
+    
+
     def up(self):
-        """本を持ち上げる"""
+        """本を持ち上げるために回転させたステッピングモータを元に戻す"""
         logger.info({'action': 'up'})
-        for theta in range(90, -90, -1):
+        for theta in range(90, 0, -1):
             self.servo_angle(theta)
             time.sleep(0.01)
 
     def down(self):
-        """本を持ち上げるために回転させたステッピングモータを元に戻す"""
+        """本を持ち上げる"""
         logger.info({'action': 'down'})
-        for theta in range(-90, 90, 1):
+        for theta in range(0, 90, 1):
             self.servo_angle(theta)
             time.sleep(0.01)
 
