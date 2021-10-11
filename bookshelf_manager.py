@@ -18,18 +18,16 @@ logger = logging.getLogger(__name__)
 # TODO: 以下のパラメータを調整
 
 # 距離センサ―が測る最小の距離[cm]
-MIN_DISTANCE = 5
+MIN_DISTANCE = 2
 # 距離センサーから測る最大の距離[cm]
-MAX_DISTANCE = 100
+MAX_DISTANCE = 20
 # 距離を測る周期[s]
 MEASURE_CYCLE = 0.1
-# ステッピングモータにつけられたギアの半径[cm]
-GEAR_RADIUS = 3
 # ステッピングモータの速さ[cm/s]
-SPEED = 1
+SPEED = 3
 # 本を取り終わるまで待つ時間[s]
-TIME_TO_WAIT_TAKE = 5
-# 装置の有効・無効を切り替えるために待つ時間
+TIME_TO_WAIT_TAKING = 3
+# 装置の有効・無効を切り替えるために待つ時間[s]
 TIME_TO_CHANGE_MODE = 2
 
 
@@ -45,12 +43,19 @@ class BookShelfManager:
         self.is_valid = True
 
         # 装置の有効・無効を変更するときに使う
-        self.retry = 0
+        self.timestamp = time.time()
 
-    def __del__(self):
+   #  def __del__(self):
+    def stop(self):
         self.servo.stop()
+        self.stepping.back_home()
         GPIO.cleanup()
         sys.exit()
+
+    def calc_destination(self, distance):
+        destination = distance - 10
+        return destination
+
 
     def cm2step(self, cm):
         """cmをstepに変換する
@@ -60,7 +65,8 @@ class BookShelfManager:
             step: 変換後の値
         """
         # 1step = 2r * Pi * (0.9/360)
-        cm_per_step = 2 * GEAR_RADIUS * math.pi * (0.9 / 360)
+        # cm_per_step = 2 * GEAR_RADIUS * math.pi * (0.9 / 360)
+        cm_per_step = 0.055
         step = cm / cm_per_step
         return step
 
@@ -75,9 +81,9 @@ class BookShelfManager:
         # 現在地から目的地までの距離
         difference = abs(current - destination)
         # 上で指定した速さ[cm/s]をstep/sに変換
-        step_per_sec = self.cm2step(SPEED)
+        step_speed = self.cm2step(SPEED)
         # 移動時間を求める
-        duration = difference / step_per_sec
+        duration = difference / step_speed
         return duration
 
     def move_and_lift_up(self, position):
@@ -93,12 +99,14 @@ class BookShelfManager:
                      'step': step,
                      'duration': duration})
         # ステッピングモータを移動させる
-        self.current_location = self.stepping.set_position(position, duration)
+        self.stepping.set_position(step, duration)
+        # 現在地を更新
+        self.current_location = step
         # 本を持ち上げる
         time.sleep(0.5)
         self.servo.up()
         # 本を取るまで待つ
-        time.sleep(TIME_TO_WAIT_TAKE)
+        time.sleep(TIME_TO_WAIT_TAKING)
         # サーボモータを元に戻す
         self.servo.down()
 
@@ -107,27 +115,42 @@ class BookShelfManager:
         while True:
             # 距離を測る
             distance = self.dis_sensor.read_distance()
+            move_to = self.calc_destination(distance)
 
             # 装置が有効で距離が範囲内の時
             if self.is_valid and \
                     distance > MIN_DISTANCE and distance < MAX_DISTANCE:
                 logger.info({'status': 'valid',
-                             'goto': distance})
+                             'goto': move_to})
                 # 測定した位置まで移動し本を持ち上げる
-                self.move_and_lift_up(distance)
+                self.move_and_lift_up(move_to)
 
+            # 距離センサに手を近づけたら
             if distance < MIN_DISTANCE:
-                self.retry += 1
-                logger.warning({'retry': self.retry})
-                # retryが20回を超えたら
-                if self.retry > 20:
+                current_time = time.time()
+                diff_time = current_time - self.timestamp
+                logger.warning({'countdown': TIME_TO_CHANGE_MODE - diff_time})
+
+                # TIME_TO_CHANGE_MODE 秒以上距離センサに手を近づけたら
+                if diff_time > TIME_TO_CHANGE_MODE:
                     # 有効・無効を切り替える
                     self.is_valid = not self.is_valid
+                    logger.warning({
+                        'action': 'change mode',
+                        'is_valid': self.is_valid})
             else:
-                # リトライの回数をリセットする
-                self.retry = 0
+                # タイムスタンプをリセットする
+                self.timestamp = time.time()
+            time.sleep(MEASURE_CYCLE)
 
 
 if __name__ == '__main__':
     manager = BookShelfManager()
-    manager.start()
+    try:
+        manager.start()
+    except KeyboardInterrupt:
+        print('Ctrl-C')
+    except Exception as e:
+        print(e)
+    finally:
+        manager.stop()

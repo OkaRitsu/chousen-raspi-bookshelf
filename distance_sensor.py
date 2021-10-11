@@ -6,6 +6,7 @@ import sys
 
 import RPi.GPIO as GPIO
 
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
@@ -25,7 +26,7 @@ class DistanceSensor:
     def read_distance(self):
         """距離を計測する
         Returns:
-            self.distance_cm: 計測した距離（cm）
+            distance_cm: 計測した距離（cm）
         """
         GPIO.output(self.trig, GPIO.HIGH)
         time.sleep(0.00001)
@@ -36,22 +37,21 @@ class DistanceSensor:
         while GPIO.input(self.echo) == GPIO.HIGH:
             self.sig_on = time.time()
 
-        self.duration = self.sig_on - self.sig_off
-        self.distance_cm = self.duration * 34000 / 2
+        duration = self.sig_on - self.sig_off
+        distance_cm = duration * 34000 / 2
 
         logging.info({'action': 'read_distance',
-                      'distance': self.distance_cm})
+                      'distance': distance_cm})
 
-        return self.distance_cm
+        return distance_cm
 
 
 if __name__ == '__main__':
     dis_sensor = DistanceSensor(27, 17)
     try:
         while True:
-            cm = dis_sensor.read_distance()
+            dis_sensor.read_distance()
             time.sleep(1)
-            print(cm)
     except KeyboardInterrupt:
-        dis_sensor.finish()
+        GPIO.cleanup()
         sys.exit()
