@@ -30,6 +30,8 @@ class DistanceSensor:
         """
         GPIO.output(self.trig, GPIO.HIGH)
         time.sleep(0.00001)
+        self.sig_off = 0
+        self.sig_on = 0
         GPIO.output(self.trig, GPIO.LOW)
 
         while GPIO.input(self.echo) == GPIO.LOW:

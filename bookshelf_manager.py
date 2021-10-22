@@ -7,6 +7,7 @@ import sys
 
 import RPi.GPIO as GPIO
 
+from led_light import Led
 from servo import Servo
 from distance_sensor import DistanceSensor
 from stepping import Stepping
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 # TODO: 以下のパラメータを調整
 
 # 距離センサ―が測る最小の距離[cm]
-MIN_DISTANCE = 2
+MIN_DISTANCE = 6
 # 距離センサーから測る最大の距離[cm]
 MAX_DISTANCE = 20
 # 距離を測る周期[s]
@@ -36,6 +37,7 @@ class BookShelfManager:
         self.dis_sensor = DistanceSensor(27, 17)
         self.servo = Servo(12)
         self.stepping = Stepping(18, 23, 24, 25)
+        self.led = Led(14)
 
         # 現在地
         self.current_location = 0
@@ -53,7 +55,7 @@ class BookShelfManager:
         sys.exit()
 
     def calc_destination(self, distance):
-        destination = distance - 10
+        destination = distance - 7
         return destination
 
 
@@ -117,6 +119,11 @@ class BookShelfManager:
             distance = self.dis_sensor.read_distance()
             move_to = self.calc_destination(distance)
 
+            if self.is_valid:
+                self.led.high()
+            else:
+                self.led.low()
+
             # 装置が有効で距離が範囲内の時
             if self.is_valid and \
                     distance > MIN_DISTANCE and distance < MAX_DISTANCE:
@@ -138,6 +145,8 @@ class BookShelfManager:
                     logger.warning({
                         'action': 'change mode',
                         'is_valid': self.is_valid})
+                    time.sleep(3)
+                    self.timestamp = time.time()
             else:
                 # タイムスタンプをリセットする
                 self.timestamp = time.time()
