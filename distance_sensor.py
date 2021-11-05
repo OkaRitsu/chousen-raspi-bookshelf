@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from os import read
 import time
+import statistics
 import sys
 
 import RPi.GPIO as GPIO
@@ -23,7 +25,24 @@ class DistanceSensor:
         # echoで指定したピン番号を入力モードに
         GPIO.setup(self.echo, GPIO.IN)
 
-    def read_distance(self):
+    def read_distance(self, read_num):
+        """
+        read_num（奇数）回距離を測定して中央値を返す
+        """
+        # read_numを奇数にする
+        if read_num % 2 == 0:
+            read_num += 1
+
+        distances = []
+        # read_num回測定する
+        for _ in range(read_num):
+            distances.append(self._read_distance())
+
+        # 中央値求めて返す
+        distance = statistics.median(distances)
+        return distance
+
+    def _read_distance(self):
         """距離を計測する
         Returns:
             distance_cm: 計測した距離（cm）

@@ -35,7 +35,6 @@ class Servo:
         # サーボモータを回転
         self.servo.ChangeDutyCycle(duty)
 
-    
 
     def up(self):
         """本を持ち上げるために回転させたステッピングモータを元に戻す"""
