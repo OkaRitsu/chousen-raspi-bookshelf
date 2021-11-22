@@ -36,19 +36,19 @@ class Servo:
         self.servo.ChangeDutyCycle(duty)
 
 
-    def up(self):
+    def down(self):
         """本を持ち上げるために回転させたステッピングモータを元に戻す"""
         logger.info({'action': 'up'})
         for theta in range(90, 0, -1):
             self.servo_angle(theta)
-            time.sleep(0.01)
+            time.sleep(0.02)
 
-    def down(self):
+    def up(self):
         """本を持ち上げる"""
         logger.info({'action': 'down'})
         for theta in range(0, 90, 1):
             self.servo_angle(theta)
-            time.sleep(0.01)
+            time.sleep(0.02)
 
     def stop(self):
         """後始末"""
