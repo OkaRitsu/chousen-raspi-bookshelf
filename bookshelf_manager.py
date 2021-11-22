@@ -11,7 +11,7 @@ from led_light import Led
 from servo import Servo
 from distance_sensor import DistanceSensor
 from stepping import Stepping
-
+from speaker import Speaker
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
@@ -47,11 +47,16 @@ class BookShelfManager:
         # 装置の有効・無効を変更するときに使う
         self.timestamp = time.time()
 
+        self.speaker = Speaker()
+
+        self.speaker.hajimemashite()
+
    #  def __del__(self):
     def stop(self):
         self.servo.stop()
         self.stepping.back_home()
         GPIO.cleanup()
+        self.speaker.stop()
         sys.exit()
 
     def calc_destination(self, distance):
@@ -107,6 +112,7 @@ class BookShelfManager:
         # 本を持ち上げる
         time.sleep(0.5)
         self.servo.up()
+        self.speaker.honwotottekudasai()
         # 本を取るまで待つ
         time.sleep(TIME_TO_WAIT_TAKING)
         # サーボモータを元に戻す
@@ -116,7 +122,7 @@ class BookShelfManager:
         """装置を動作させる"""
         while True:
             # 距離を測る
-            distance = self.dis_sensor.read_distance()
+            distance = self.dis_sensor.read_distance(11)
             move_to = self.calc_destination(distance)
 
             if self.is_valid:
@@ -130,6 +136,7 @@ class BookShelfManager:
                 logger.info({'status': 'valid',
                              'goto': move_to})
                 # 測定した位置まで移動し本を持ち上げる
+                self.speaker.honwodashimasu()
                 self.move_and_lift_up(move_to)
 
             # 距離センサに手を近づけたら
@@ -159,7 +166,4 @@ if __name__ == '__main__':
         manager.start()
     except KeyboardInterrupt:
         print('Ctrl-C')
-    except Exception as e:
-        print(e)
-    finally:
         manager.stop()
