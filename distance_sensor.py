@@ -53,8 +53,12 @@ class DistanceSensor:
         self.sig_on = 0
         GPIO.output(self.trig, GPIO.LOW)
 
+        counter = 0
         while GPIO.input(self.echo) == GPIO.LOW:
             self.sig_off = time.time()
+            counter += 1
+            if counter > 1000:
+                break
         while GPIO.input(self.echo) == GPIO.HIGH:
             self.sig_on = time.time()
 
@@ -71,7 +75,7 @@ if __name__ == '__main__':
     dis_sensor = DistanceSensor(27, 17)
     try:
         while True:
-            dis_sensor.read_distance()
+            dis_sensor.read_distance(11)
             time.sleep(1)
     except KeyboardInterrupt:
         GPIO.cleanup()
