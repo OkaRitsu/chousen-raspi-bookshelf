@@ -16,8 +16,6 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-# TODO: 以下のパラメータを調整
-
 # 距離センサ―が測る最小の距離[cm]
 MIN_DISTANCE = 8 
 # 距離センサーから測る最大の距離[cm]
@@ -47,9 +45,9 @@ class BookShelfManager:
 
         # 装置の有効・無効を変更するときに使う
         self.timestamp = time.time()
-
+        
+        # 起動時に音声を再生する
         self.speaker = Speaker()
-
         self.speaker.hajimemashite()
 
     def stop(self):
@@ -70,8 +68,6 @@ class BookShelfManager:
         Returns:
             step: 変換後の値
         """
-        # 1step = 2r * Pi * (0.9/360)
-        # cm_per_step = 2 * GEAR_RADIUS * math.pi * (0.9 / 360)
         cm_per_step = 0.055
         step = cm / cm_per_step
         return step
@@ -117,7 +113,7 @@ class BookShelfManager:
         # サーボモータを元に戻す
         self.servo.down()
 
-    def start(self):
+    def main(self):
         """装置を動作させる"""
         while True:
             # 距離を測る
@@ -135,7 +131,6 @@ class BookShelfManager:
                 # 測定した位置まで移動し本を持ち上げる
                 self.speaker.honwodashimasu()
                 self.move_and_lift_up(move_to)
-                print()
             # 距離センサに手を近づけたら
             if distance < MIN_DISTANCE or status:
                 current_time = time.time()
@@ -168,7 +163,7 @@ class BookShelfManager:
 if __name__ == '__main__':
     manager = BookShelfManager()
     try:
-        manager.start()
+        manager.main()
     except KeyboardInterrupt:
         import traceback
         traceback.print_exc()

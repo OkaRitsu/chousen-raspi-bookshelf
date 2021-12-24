@@ -18,10 +18,6 @@ class Speaker:
     def speak(self, voice_file):
         pygame.mixer.music.load(voice_file)
         pygame.mixer.music.play(loops=0)
-        # #while True:
-        #     if(pygame.mixer.music.get_busy() != True):
-        #         break
-        #     time.sleep( 0.2 )
 
     def hajimemashite(self):
         self.speak("./voice/hajimemashite.mp3")
