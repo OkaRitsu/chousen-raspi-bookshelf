@@ -18,13 +18,10 @@ class Speaker:
     def speak(self, voice_file):
         pygame.mixer.music.load(voice_file)
         pygame.mixer.music.play(loops=0)
-        while True:
-            if(pygame.mixer.music.get_busy() != True):
-                break
-            time.sleep( 0.2 )
 
     def hajimemashite(self):
         self.speak("./voice/hajimemashite.mp3")
+        time.sleep(6)
         self.speak("./voice/hajimemashite2.mp3")
 
     def goriyou(self):
@@ -41,6 +38,12 @@ class Speaker:
 
     def honwotottekudasai(self):
         self.speak("./voice/honwotottekudasai.mp3")
+
+    def modosu(self):
+        self.speak("./voice/modosu.mp3")
+        
+    def toridasu(self):
+        self.speak("./voice/toridasu.mp3")
 
 if __name__ == '__main__':
     speaker = Speaker()

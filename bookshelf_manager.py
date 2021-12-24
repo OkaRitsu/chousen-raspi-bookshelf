@@ -16,12 +16,10 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-# TODO: 以下のパラメータを調整
-
 # 距離センサ―が測る最小の距離[cm]
-MIN_DISTANCE = 6
+MIN_DISTANCE = 8 
 # 距離センサーから測る最大の距離[cm]
-MAX_DISTANCE = 20
+MAX_DISTANCE = 27 
 # 距離を測る周期[s]
 MEASURE_CYCLE = 0.1
 # ステッピングモータの速さ[cm/s]
@@ -37,7 +35,8 @@ class BookShelfManager:
         self.dis_sensor = DistanceSensor(27, 17)
         self.servo = Servo(12)
         self.stepping = Stepping(18, 23, 24, 25)
-        self.led = Led(14)
+        self.led = Led(21,15)
+        self.led.led_on()
 
         # 現在地
         self.current_location = 0
@@ -46,23 +45,21 @@ class BookShelfManager:
 
         # 装置の有効・無効を変更するときに使う
         self.timestamp = time.time()
-
+        
+        # 起動時に音声を再生する
         self.speaker = Speaker()
-
         self.speaker.hajimemashite()
 
-   #  def __del__(self):
     def stop(self):
         self.servo.stop()
+        self.speaker.goriyou()
         self.stepping.back_home()
         GPIO.cleanup()
-        self.speaker.stop()
         sys.exit()
 
     def calc_destination(self, distance):
         destination = distance - 7
         return destination
-
 
     def cm2step(self, cm):
         """cmをstepに変換する
@@ -71,8 +68,6 @@ class BookShelfManager:
         Returns:
             step: 変換後の値
         """
-        # 1step = 2r * Pi * (0.9/360)
-        # cm_per_step = 2 * GEAR_RADIUS * math.pi * (0.9 / 360)
         cm_per_step = 0.055
         step = cm / cm_per_step
         return step
@@ -118,29 +113,26 @@ class BookShelfManager:
         # サーボモータを元に戻す
         self.servo.down()
 
-    def start(self):
+    def main(self):
         """装置を動作させる"""
         while True:
             # 距離を測る
             distance = self.dis_sensor.read_distance(11)
             move_to = self.calc_destination(distance)
 
-            if self.is_valid:
-                self.led.high()
-            else:
-                self.led.low()
+            # ボタンが押されているか調べる
+            status = self.led.get_btn_status()
+            
 
             # 装置が有効で距離が範囲内の時
-            if self.is_valid and \
-                    distance > MIN_DISTANCE and distance < MAX_DISTANCE:
+            if self.is_valid and  distance > MIN_DISTANCE and distance < MAX_DISTANCE:
                 logger.info({'status': 'valid',
                              'goto': move_to})
                 # 測定した位置まで移動し本を持ち上げる
                 self.speaker.honwodashimasu()
                 self.move_and_lift_up(move_to)
-
             # 距離センサに手を近づけたら
-            if distance < MIN_DISTANCE:
+            if distance < MIN_DISTANCE or status:
                 current_time = time.time()
                 diff_time = current_time - self.timestamp
                 logger.warning({'countdown': TIME_TO_CHANGE_MODE - diff_time})
@@ -149,6 +141,14 @@ class BookShelfManager:
                 if diff_time > TIME_TO_CHANGE_MODE:
                     # 有効・無効を切り替える
                     self.is_valid = not self.is_valid
+                    if self.is_valid:
+                        self.speaker.toridasu()
+                        self.led.led_on()
+                        
+                    else:
+                        self.speaker.modosu()
+                        self.led.led_off()
+                        
                     logger.warning({
                         'action': 'change mode',
                         'is_valid': self.is_valid})
@@ -163,7 +163,8 @@ class BookShelfManager:
 if __name__ == '__main__':
     manager = BookShelfManager()
     try:
-        manager.start()
+        manager.main()
     except KeyboardInterrupt:
-        print('Ctrl-C')
+        import traceback
+        traceback.print_exc()
         manager.stop()

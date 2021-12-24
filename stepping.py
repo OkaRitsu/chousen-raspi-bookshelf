@@ -89,9 +89,9 @@ class Stepping:
             self.set_wait_time(wait)
         for _ in range(int(abs(diff_step))):
             if diff_step > 0:
-                self.step_ccw()
-            if diff_step < 0:
                 self.step_cw()
+            if diff_step < 0:
+                self.step_ccw()
         self.mStep = step
 
     def back_home(self):
